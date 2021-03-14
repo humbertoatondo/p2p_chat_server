@@ -1,11 +1,25 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"os"
+
+	"github.com/humbertoatondo/p2p_chat_server/internal/api"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	fmt.Println("Hello")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatalf("Error loadin dotenv file")
+	}
 
-	server := Server{}
+	server := api.Server{}
+	server.Initialize(
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+	)
+
+	server.Run(":3000")
 }

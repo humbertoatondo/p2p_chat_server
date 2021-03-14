@@ -8,6 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+
+	"github.com/humbertoatondo/p2p_chat_server/internal/api/connection"
 )
 
 // Server is where routers and database are stored
@@ -32,12 +34,20 @@ func (server *Server) Initialize(host, user, password, dbname string) {
 	var err error
 	if server.DB, err = sql.Open("postgres", connectionString); err != nil {
 		log.Fatal(err)
+		fmt.Printf("Error: %v\n", err)
 	}
 
 	server.Router = mux.NewRouter()
+
+	server.initializeRoutes()
 }
 
 // Run is used for the server to start listening
 func (server *Server) Run(port string) {
 	log.Fatal(http.ListenAndServe(port, server.Router))
+}
+
+func (server *Server) initializeRoutes() {
+	server.Router.HandleFunc("/connection", connection.ConnectionTest).Methods("GET")
+	server.Router.HandleFunc("/user/login", user)
 }
