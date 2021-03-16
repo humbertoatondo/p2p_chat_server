@@ -34,7 +34,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	var isValidUser bool
-	sqlQueryString := `SELECT 1 FROM public.users WHERE name=$1 and password=$2`
+	sqlQueryString := `SELECT 1 FROM users WHERE name=$1 and password=$2`
 	db.QueryRow(sqlQueryString, usr.Name, usr.Password).Scan(&isValidUser)
 
 	if !isValidUser {
@@ -54,7 +54,7 @@ func SearchUsers(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	searchTerm := keys[0] + "%"
-	sqlQueryString := `SELECT name FROM public.users WHERE name LIKE $1`
+	sqlQueryString := `SELECT name FROM users WHERE name LIKE $1`
 	rows, err := db.Query(sqlQueryString, searchTerm)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Error while querying table")

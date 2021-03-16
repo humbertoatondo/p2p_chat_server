@@ -54,7 +54,7 @@ func (server *Server) Run(port string) {
 
 func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc("/connection", connection.ConnectionTest).Methods("GET")
-	server.Router.HandleFunc("/user/login", server.wrapper(user.Login)).Methods("GET")
+	server.Router.HandleFunc("/user/login", server.wrapper(user.Login)).Methods("POST")
 	server.Router.HandleFunc("/user/searchUsers", server.wrapper(user.SearchUsers)).Methods("GET")
 }
 
