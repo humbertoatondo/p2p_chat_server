@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/humbertoatondo/p2p_chat_server/internal/api/connection"
+	"github.com/humbertoatondo/p2p_chat_server/internal/api/user"
 )
 
 // Server is where routers and database are stored
@@ -17,6 +18,8 @@ type Server struct {
 	Router *mux.Router
 	DB     *sql.DB
 }
+
+type fn func(http.ResponseWriter, *http.Request, *sql.DB)
 
 /*
 Initialize is the setup function where the server connects to
@@ -32,9 +35,11 @@ func (server *Server) Initialize(host, user, password, dbname string) {
 	)
 
 	var err error
-	if server.DB, err = sql.Open("postgres", connectionString); err != nil {
+	server.DB, err = sql.Open("postgres", connectionString)
+	if err != nil {
 		log.Fatal(err)
 		fmt.Printf("Error: %v\n", err)
+		return
 	}
 
 	server.Router = mux.NewRouter()
@@ -49,5 +54,12 @@ func (server *Server) Run(port string) {
 
 func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc("/connection", connection.ConnectionTest).Methods("GET")
-	server.Router.HandleFunc("/user/login", user)
+	server.Router.HandleFunc("/user/login", server.wrapper(user.Login)).Methods("GET")
+	server.Router.HandleFunc("/user/searchUsers", server.wrapper(user.SearchUsers)).Methods("GET")
+}
+
+func (server *Server) wrapper(f fn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		f(w, r, server.DB)
+	}
 }
