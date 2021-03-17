@@ -6,20 +6,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 
 	"github.com/humbertoatondo/p2p_chat_server/internal/api/connection"
 	"github.com/humbertoatondo/p2p_chat_server/internal/api/user"
 )
-
-// Server is where routers and database are stored
-type Server struct {
-	Router *mux.Router
-	DB     *sql.DB
-}
-
-type fn func(http.ResponseWriter, *http.Request, *sql.DB)
 
 /*
 Initialize is the setup function where the server connects to
@@ -44,6 +38,8 @@ func (server *Server) Initialize(host, user, password, dbname string) {
 
 	server.Router = mux.NewRouter()
 
+	server.UserConns = make(map[string]*websocket.Conn)
+
 	server.initializeRoutes()
 }
 
@@ -60,6 +56,6 @@ func (server *Server) initializeRoutes() {
 
 func (server *Server) wrapper(f fn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		f(w, r, server.DB)
+		f(w, r, server)
 	}
 }

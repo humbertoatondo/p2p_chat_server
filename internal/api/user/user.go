@@ -1,16 +1,9 @@
 package user
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 )
-
-type user struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	respondWithJSON(w, code, map[string]string{"error": message})
@@ -25,8 +18,8 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 // Login validates user's login credentials
-func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	var usr user
+func Login(w http.ResponseWriter, r *http.Request, server *Server) {
+	var usr User
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&usr); err != nil {
 		w.Write([]byte("Error occurred while decoding body.\n"))
@@ -35,7 +28,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	var isValidUser bool
 	sqlQueryString := `SELECT 1 FROM users WHERE name=$1 and password=$2`
-	db.QueryRow(sqlQueryString, usr.Name, usr.Password).Scan(&isValidUser)
+	server.db.QueryRow(sqlQueryString, usr.Name, usr.Password).Scan(&isValidUser)
 
 	if !isValidUser {
 		respondWithError(w, http.StatusUnauthorized, "Invalid credentials")
@@ -46,7 +39,7 @@ func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
-func SearchUsers(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func SearchUsers(w http.ResponseWriter, r *http.Request, server *Server) {
 	keys, ok := r.URL.Query()["searchTerm"]
 	if !ok {
 		respondWithError(w, http.StatusBadRequest, "Payload missing 'searchTerm'")
@@ -55,7 +48,7 @@ func SearchUsers(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	searchTerm := keys[0] + "%"
 	sqlQueryString := `SELECT name FROM users WHERE name LIKE $1`
-	rows, err := db.Query(sqlQueryString, searchTerm)
+	rows, err := server.db.Query(sqlQueryString, searchTerm)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Error while querying table")
 		return
