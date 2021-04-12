@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loadin dotenv file")
+		log.Fatalf("Error loading dotenv file")
 	}
 
 	server := api.Server{}
