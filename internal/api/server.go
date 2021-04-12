@@ -6,14 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/websocket"
-
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-
-	"github.com/humbertoatondo/p2p_chat_server/internal/api/connection"
-	"github.com/humbertoatondo/p2p_chat_server/internal/api/user"
+	"github.com/gorilla/websocket"
 )
+
+type handlerWrapper func(http.ResponseWriter, *http.Request, *Server)
 
 /*
 Initialize is the setup function where the server connects to
@@ -49,13 +46,14 @@ func (server *Server) Run(port string) {
 }
 
 func (server *Server) initializeRoutes() {
-	server.Router.HandleFunc("/connection", connection.ConnectionTest).Methods("GET")
-	server.Router.HandleFunc("/user/login", server.wrapper(user.Login)).Methods("POST")
-	server.Router.HandleFunc("/user/searchUsers", server.wrapper(user.SearchUsers)).Methods("GET")
+	server.Router.HandleFunc("/connect", server.wrapper(ConnectSocket)).Methods("GET")
+	server.Router.HandleFunc("/user/login", server.wrapper(Login)).Methods("POST")
+	server.Router.HandleFunc("/searchUsers", server.wrapper(SearchUsers)).Methods("GET")
 }
 
-func (server *Server) wrapper(f fn) http.HandlerFunc {
+func (server *Server) wrapper(wrapper handlerWrapper) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		f(w, r, server)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		wrapper(w, r, server)
 	}
 }
