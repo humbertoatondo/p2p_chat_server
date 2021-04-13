@@ -38,10 +38,14 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v2
 
+      - run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends postgresql-client
+
       # Create tables described in init.sql
       - name: Create tables from init.sql
         run: |
-          psql -h postgres -U admin -c 
+          psql -h postgres -U postgres -c 
             'CREATE TABLE public.users (
                 id SERIAL,
                 username VARCHAR(50) NOT NULL,
