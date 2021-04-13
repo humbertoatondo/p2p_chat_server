@@ -20,8 +20,8 @@ jobs:
         # Docker Hub image
         image: postgres
         # Create tables described in init.sql
-        volumes:
-          - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        with:
+          postgres init scripts: init.sql
         # Create env variables
         env:
           POSTGRES_USER: admin
