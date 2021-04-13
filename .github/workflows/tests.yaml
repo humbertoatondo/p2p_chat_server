@@ -19,9 +19,6 @@ jobs:
       postgres:
         # Docker Hub image
         image: postgres
-        # Create tables described in init.sql
-        volumes:
-          - ./init.sql:/docker-entrypoint-initdb.d/init.sql
         # Create env variables
         env:
           POSTGRES_USER: admin
@@ -40,6 +37,10 @@ jobs:
       # Get copy of code in the repository before running tests
       - name: Checkout repository code
         uses: actions/checkout@v2
+
+      # Create tables described in init.sql
+      - name: Create tables from init.sql
+        run: ./init.sql
 
       - name: Create env file
         run: |
