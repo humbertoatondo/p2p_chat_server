@@ -38,9 +38,8 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v2
 
-
-        # Create tables described in init.sql
-      - uses: ./
+      # Create tables described in init.sql
+      - name: Create tables from init.sql
         with:
           postgres init scripts: init.sql
 
