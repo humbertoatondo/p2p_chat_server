@@ -21,7 +21,7 @@ jobs:
         image: postgres
         # Create env variables
         env:
-          POSTGRES_USER: admin
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: chat
         ports:
