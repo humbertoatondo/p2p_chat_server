@@ -40,7 +40,14 @@ jobs:
 
       # Create tables described in init.sql
       - name: Create tables from init.sql
-        run: sudo ./init.sql
+        run: |
+          psql -h postgres -U admin -c 
+            'CREATE TABLE public.users (
+                id SERIAL,
+                username VARCHAR(50) NOT NULL,
+                password VARCHAR(50) NOT NULL,
+                CONSTRAINT user_pkey PRIMARY KEY (id)
+            );'
 
       - name: Create env file
         run: |
