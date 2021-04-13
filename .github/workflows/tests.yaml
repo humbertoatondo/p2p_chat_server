@@ -40,7 +40,7 @@ jobs:
 
       # Create tables described in init.sql
       - name: Create tables from init.sql
-        run: ./init.sql
+        run: sudo ./init.sql
 
       - name: Create env file
         run: |
