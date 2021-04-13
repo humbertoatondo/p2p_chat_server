@@ -17,8 +17,11 @@ jobs:
     services:
       # Label used to access the service container
       postgres:
-        # Dcoker Hub image
+        # Docker Hub image
         image: postgres
+        # Create tables described in init.sql
+        volumes:
+          - ./init.sql:/docker-entrypoint-initdb.d/init.sql
         # Create env variables
         env:
           POSTGRES_USER: admin
@@ -41,10 +44,10 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo APP_DB_USERNAME: "postgres" >> .env
-          echo APP_DB_PASSWORD: "password" >> .env
-          echo APP_DB_NAME: "golang-server" >> .env
-          echo APP_DB_HOST: "postgres" >> .env
+          echo DB_USERNAME: "postgres" >> .env
+          echo DB_PASSWORD: "password" >> .env
+          echo DB_NAME: "golang-server" >> .env
+          echo DB_HOST: "postgres" >> .env
 
       - name: Setup Go
         uses: actions/setup-go@v2

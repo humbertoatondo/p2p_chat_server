@@ -18,7 +18,7 @@ the database, the router is initialized and routes are created.
 */
 func (server *Server) Initialize(host, user, password, dbname string) {
 	connectionString := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=5432 user=%s password=%s dbname=%s sslmode=disable",
 		host,
 		user,
 		password,
@@ -27,6 +27,7 @@ func (server *Server) Initialize(host, user, password, dbname string) {
 
 	var err error
 	server.DB, err = sql.Open("postgres", connectionString)
+
 	if err != nil {
 		log.Fatal(err)
 		fmt.Printf("Error: %v\n", err)
