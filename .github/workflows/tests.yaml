@@ -34,23 +34,8 @@ jobs:
           --health-retries 5
 
     steps:
-      # Get copy of code in the repository before running tests
       - name: Checkout repository code
         uses: actions/checkout@v2
-
-      - run: |
-          apt-get update
-          apt-get install --yes --no-install-recommends postgresql-client
-
-      # Create tables described in init.sql
-      - name: Create tables from init.sql
-        run: |
-          PGPASSWORD=password psql -h postgres -U postgres -tc "CREATE TABLE public.users (
-                id SERIAL,
-                username VARCHAR(50) NOT NULL,
-                password VARCHAR(50) NOT NULL,
-                CONSTRAINT user_pkey PRIMARY KEY (id)
-            );"
 
       - name: Create env file
         run: |

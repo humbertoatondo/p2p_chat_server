@@ -23,8 +23,24 @@ func TestMain(m *testing.M) {
 		os.Getenv("DB_NAME"),
 	)
 
+	ensureTableExists()
+
 	code := m.Run()
 	os.Exit(code)
+}
+
+const tableCreationQuery = `CREATE TABLE IF NOT EXIST users (
+    id SERIAL,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    CONSTRAINT user_pkey PRIMARY KEY (id)
+)`
+
+// Create users table if it doesn't exist.
+func ensureTableExists() {
+	if _, err := server.DB.Exec(tableCreationQuery); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // Ping database to check that there is a connection.
