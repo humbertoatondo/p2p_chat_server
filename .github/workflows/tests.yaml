@@ -40,9 +40,9 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo DB_USERNAME: "postgres" >> .env
+          echo DB_USERNAME: "admin" >> .env
           echo DB_PASSWORD: "password" >> .env
-          echo DB_NAME: "golang-server" >> .env
+          echo DB_NAME: "chat" >> .env
           echo DB_HOST: "postgres" >> .env
 
       - name: Setup Go
@@ -53,4 +53,4 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        run: go test -v ./cmd/...
+        run: go test -v ./...
