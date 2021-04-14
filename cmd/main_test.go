@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -23,9 +26,9 @@ func TestMain(m *testing.M) {
 		os.Getenv("DB_NAME"),
 	)
 
-	ensureTableExists()
-
+	ensureUsersTableExists()
 	code := m.Run()
+	clearUsersTable()
 	os.Exit(code)
 }
 
@@ -38,9 +41,29 @@ const tableCreationQuery = `CREATE TABLE IF NOT EXISTS users
 )`
 
 // Create users table if it doesn't exist.
-func ensureTableExists() {
+func ensureUsersTableExists() {
 	if _, err := server.DB.Exec(tableCreationQuery); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// Make sure users table is empty.
+func clearUsersTable() {
+	server.DB.Exec("DELETE FROM users")
+	server.DB.Exec("ALTER SEQUENCE users_id_seq RESTART WITH 1")
+}
+
+// Execute http request.
+func executeRequest(req *http.Request) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	server.Router.ServeHTTP(rr, req)
+
+	return rr
+}
+
+func checkResponseCode(t *testing.T, expected, actual int) {
+	if expected != actual {
+		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
 	}
 }
 
@@ -50,4 +73,20 @@ func TestDatabaseConnection(t *testing.T) {
 	if err != nil {
 		t.Errorf("Could not connect with postgres database: %v\n", err)
 	}
+}
+
+func TestUserLogin(t *testing.T) {
+	clearUsersTable()
+
+	// Insert row in users table.
+	server.DB.Exec("INSERT INTO users (username, password) VALUES ('john_doe', 'password')")
+
+	// Make http post request for user's login.
+	var jsonStr = []byte(`{"username":"john_doe", "password": "password"}`)
+	req, _ := http.NewRequest("POST", "/user/login", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
+
+	// Verify response code is the expected result.
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
 }
